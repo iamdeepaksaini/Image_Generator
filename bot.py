@@ -53,6 +53,7 @@ def reply(client, message):
     # प्रोसेसिंग
     msg = message.text
     god = msg.replace(' ', '%20')
+    usertime[user_id] = 45
     s = message.reply_text(f"𝐏𝐋𝐄𝐀𝐒𝐄 𝐖𝐀𝐈𝐓 ...\n\n 𝑮𝑬𝑵𝑬𝑹𝑨𝑻𝑰𝑵𝑮 𝑰𝑴𝑨𝑮𝑬 𝑭𝑶𝑹 ✵{msg}✵")
     image_url1 = f"{image_url}{god}"
     a = message.reply_photo(photo=image_url1, caption=f"𝒀𝑶𝑼𝑹 𝑹𝑬𝑸𝑼𝑬𝑺𝑻𝑬𝑫 𝑰𝑴𝑨𝑮𝑬 𝑭𝑶𝑹:\n✫ {msg} ✫\n\n𝐍𝐎𝐓𝐄 ☞ THIS IMAGE WILL BE DELETED IN 5 MINUTES PLEASE SAVE THIS IMAGE IN ANY OTHER CHAT.\n\n    ʙʏ ➳ 𝐌𝐑. 𝐒𝐈𝐍𝐆𝐎𝐃𝐈𝐘𝐀")
