@@ -22,6 +22,12 @@ app = Client("my_bot", api_id=api_id, api_hash=api_hash, bot_token=bot_token)
 
 usertime = {}
 # जब भी कोई मैसेज प्राप्त हो
+# Start Command
+@app.on_message(filters.command("start"))
+async def start(client, message):
+    message.reply_text("ʜᴇʏ! ɪ ᴀᴍ ᴀɴ ᴀɪ ɪᴍᴀɢᴇ ɢᴇɴᴇʀᴀᴛᴏʀ. ɪ'ᴍ ʜᴇʀᴇ ᴛᴏ ʙʀɪɴɢ ʏᴏᴜʀ ɪᴅᴇᴀs ᴛᴏ ʟɪғᴇ ᴡɪᴛʜ ʙʀᴇᴀᴛʜᴛᴀᴋɪɴɢ ᴀʀᴛᴡᴏʀᴋ! ᴅᴇsᴄʀɪʙᴇ ᴀɴʏ sᴄᴇɴᴇ, ᴄʜᴀʀᴀᴄᴛᴇʀ, ᴏʀ ᴄᴏɴᴄᴇᴘᴛ ʏᴏᴜ ᴄᴀɴ ɪᴍᴀɢɪɴᴇ, ᴀɴᴅ ɪ'ʟʟ ᴛʀᴀɴsғᴏʀᴍ ɪᴛ ɪɴᴛᴏ ᴀᴍᴀᴢɪɴɢ ᴠɪsᴜᴀʟs. ʟᴇᴛ's ᴄʀᴇᴀᴛᴇ sᴏᴍᴇᴛʜɪɴɢ ᴇxᴛʀᴀᴏʀᴅɪɴᴀʀʏ ᴛᴏɢᴇᴛʜᴇʀ!
+
+")
 @app.on_message(filters.text)
 def reply(client, message):
     user_id = message.from_user.id
