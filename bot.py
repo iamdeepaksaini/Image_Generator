@@ -25,9 +25,15 @@ usertime = {}
 # Start Command
 @app.on_message(filters.command("start"))
 async def start(client, message):
-    message.reply_text("ʜᴇʏ! ɪ ᴀᴍ ᴀɴ ᴀɪ ɪᴍᴀɢᴇ ɢᴇɴᴇʀᴀᴛᴏʀ. ɪ'ᴍ ʜᴇʀᴇ ᴛᴏ ʙʀɪɴɢ ʏᴏᴜʀ ɪᴅᴇᴀs ᴛᴏ ʟɪғᴇ ᴡɪᴛʜ ʙʀᴇᴀᴛʜᴛᴀᴋɪɴɢ ᴀʀᴛᴡᴏʀᴋ! ᴅᴇsᴄʀɪʙᴇ ᴀɴʏ sᴄᴇɴᴇ, ᴄʜᴀʀᴀᴄᴛᴇʀ, ᴏʀ ᴄᴏɴᴄᴇᴘᴛ ʏᴏᴜ ᴄᴀɴ ɪᴍᴀɢɪɴᴇ, ᴀɴᴅ ɪ'ʟʟ ᴛʀᴀɴsғᴏʀᴍ ɪᴛ ɪɴᴛᴏ ᴀᴍᴀᴢɪɴɢ ᴠɪsᴜᴀʟs. ʟᴇᴛ's ᴄʀᴇᴀᴛᴇ sᴏᴍᴇᴛʜɪɴɢ ᴇxᴛʀᴀᴏʀᴅɪɴᴀʀʏ ᴛᴏɢᴇᴛʜᴇʀ!
-
-")
+    first_name = message.from_user.first_name
+    await message.reply_text(
+        f"ʜᴇʏ {first_name}! ɪ ᴀᴍ ᴀɴ ᴀɪ ɪᴍᴀɢᴇ ɢᴇɴᴇʀᴀᴛᴏʀ.\n"
+        "ɪ'ᴍ ʜᴇʀᴇ ᴛᴏ ʙʀɪɴɢ ʏᴏᴜʀ ɪᴅᴇᴀs ᴛᴏ ʟɪғᴇ ᴡɪᴛʜ ʙʀᴇᴀᴛʜᴛᴀᴋɪɴɢ ᴀʀᴛᴡᴏʀᴋ!\n"
+        "ᴅᴇsᴄʀɪʙᴇ ᴀɴʏ sᴄᴇɴᴇ, ᴄʜᴀʀᴀᴄᴛᴇʀ, ᴏʀ ᴄᴏɴᴄᴇᴘᴛ ʏᴏᴜ ᴄᴀɴ ɪᴍᴀɢɪɴᴇ, "
+        "ᴀɴᴅ ɪ'ʟʟ ᴛʀᴀɴsғᴏʀᴍ ɪᴛ ɪɴᴛᴏ ᴀᴍᴀᴢɪɴɢ ᴠɪsᴜᴀʟs.\n"
+        "ʟᴇᴛ's ᴄʀᴇᴀᴛᴇ sᴏᴍᴇᴛʜɪɴɢ ᴇxᴛʀᴀᴏʀᴅɪɴᴀʀʏ ᴛᴏɢᴇᴛʜᴇʀ!"
+    )
+    
 @app.on_message(filters.text)
 def reply(client, message):
     user_id = message.from_user.id
