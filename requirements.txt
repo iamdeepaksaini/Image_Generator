@@ -5,4 +5,4 @@ Flask>=2.0,<3.0
 Werkzeug>=2.0,<3.0
 requests
 Pillow==9.3.0
-segno==1.7.0
+segno==1.6.1
