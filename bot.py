@@ -8,6 +8,7 @@ from flask import Flask, request, send_file
 import qrcode
 from PIL import Image
 import io
+import requests
 # Telegram API credentials
 api_id = int(os.getenv("API_ID"))
 api_hash = os.getenv("API_HASH")
