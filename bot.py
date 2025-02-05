@@ -5,7 +5,7 @@ import os
 import threading
 #from flask import Flask
 from flask import Flask, request, send_file
-import qrcode
+import segno
 from PIL import Image
 import io
 import requests
@@ -16,6 +16,56 @@ bot_token = os.getenv("BOT_TOKEN")
 image_url = os.getenv("IMAGE_URL")
 
 flask_app = Flask(__name__)
+@flask_app.route('/create-qr-code/', methods=['GET'])
+def create_qr_code():
+    # Step 1: Get user parameters from GET request
+    logo_url = request.args.get('logo', '')  # Logo URL
+    size = request.args.get('size', '300×300')  # Size of QR Code (default 300x300)
+    colour = request.args.get('colour', 'black')  # Colour of QR Code (default black)
+    data = request.args.get('data', '')  # Data to encode in QR Code
+
+    # Step 2: Parse the size parameter (width, height)
+    width, height = map(int, size.split('×'))
+
+    # Step 3: Generate the QR code using segno library
+    qr = segno.make(data)
+
+    # Step 4: Create the QR Code image with the given colour
+    qr_img = qr.to_pil()  # Generate the QR code as a PIL image
+    qr_img = qr_img.convert('RGBA')  # Convert to RGBA to handle transparency for logo
+
+    # Step 5: Add logo if provided
+    if logo_url:
+        # Step 5.1: Download the logo image from the URL
+        response = requests.get(logo_url)
+        if response.status_code == 200:
+            logo = Image.open(io.BytesIO(response.content))  # Load image from byte stream
+
+            # Step 5.2: Resize the logo to fit inside the QR code (1/5th of the QR code size)
+            qr_width, qr_height = qr_img.size
+            logo_size = qr_width // 5  # Resize logo to 1/5th of QR code size
+            logo = logo.resize((logo_size, logo_size))
+
+            # Step 5.3: Position the logo in the center of the QR code
+            logo_position = ((qr_width - logo_size) // 2, (qr_height - logo_size) // 2)
+
+            # Step 5.4: Paste the logo on top of the QR code
+            qr_img.paste(logo, logo_position, mask=logo.convert("RGBA").split()[3])  # Use alpha channel as mask
+        else:
+            return "Logo could not be fetched, please check the URL", 400
+
+    # Step 6: Resize QR code image to match the requested size
+    qr_img = qr_img.resize((width, height), Image.ANTIALIAS)
+
+    # Step 7: Save the image to a bytes buffer
+    img_io = io.BytesIO()
+    qr_img.save(img_io, 'PNG')
+    img_io.seek(0)
+
+    # Step 8: Return the image as response
+    return send_file(img_io, mimetype='image/png')
+
+"""
 @flask_app.route('/create-qr-code/', methods=['GET'])
 def create_qr_code():
     # Step 1: Get user parameters from GET request
@@ -61,7 +111,7 @@ def create_qr_code():
 
     # Step 7: Return the image as response
     return send_file(img_io, mimetype='image/png')
-
+"""
 """
 @flask_app.route('/create-qr-code/', methods=['GET'])
 def create_qr_code():
