@@ -10,7 +10,7 @@ import io
 import requests
 from PIL import Image, ImageDraw
 from flask import Flask, request, jsonify
-import g4f
+from g4f.client import Client
 # Telegram API credentials
 api_id = int(os.getenv("API_ID"))
 api_hash = os.getenv("API_HASH")
