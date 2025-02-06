@@ -275,10 +275,13 @@ def create_qr_code():
 def home():
     return "Image Generater Bot is running."
 
+
+from pyrogram import Client, filters
+
 app = Client("my_bot", api_id=api_id, api_hash=api_hash, bot_token=bot_token)
 
 # उपयोगकर्ता का ट्रैक रखने के लिए डिक्शनरी
-from pyrogram import Client, filters
+
 usertime = {}
 # जब भी कोई मैसेज प्राप्त हो
 # Start Command
