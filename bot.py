@@ -32,7 +32,7 @@ def create_qr_code():
     size = request.args.get('size', '300×300')  # Size of QR Code (default 300x300)
     colour = request.args.get('colour', 'black')  # Colour of QR Code (default black)
     data = request.args.get('data', '')  # Data to encode in QR Code
-
+    back_colour = request.args.get('back_colour', 'white')
     # Step 2: Parse the size parameter (width, height)
     width, height = map(int, size.split('×'))
 
@@ -47,7 +47,8 @@ def create_qr_code():
     qr.make(fit=True)
 
     # Step 4: Create the QR Code image with the given colour
-    qr_img = qr.make_image(fill=colour, back_color='white').convert('RGBA')
+    qr_img = qr.make_image(fill_color=colour, back_color=back_colour).convert('RGBA')
+    #qr_img = qr.make_image(fill_color=colour, back_color='white')
 
     # Step 5: Add logo if provided
     if logo_url:
