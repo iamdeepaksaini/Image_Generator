@@ -17,6 +17,7 @@ bot_token = os.getenv("BOT_TOKEN")
 image_url = os.getenv("IMAGE_URL")
 
 flask_app = Flask(__name__)
+
 @flask_app.route("/ai-image", methods=["GET"])
 def generate_image():
     try:
@@ -45,7 +46,7 @@ def generate_image():
         generated_image = image_model(prompt=prompt)
 
         # Correct File Path (absolute path for Termux)
-        temp_file = f"generated_image_{prompt.replace(' ', '_')}.png"
+        temp_file = f"/tmp/generated_image_{prompt.replace(' ', '_')}.png"  # Render uses /tmp for temporary files
         
         # Ensure directory exists
         os.makedirs(os.path.dirname(temp_file), exist_ok=True)
@@ -68,6 +69,7 @@ def generate_image():
     
     except Exception as e:
         return f"Error: {str(e)}", 500
+
 """
 @flask_app.route('/aichat', methods=['GET'])
 def ai_chat():
