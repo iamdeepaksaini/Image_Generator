@@ -1,4 +1,3 @@
-
 import time
 from dotenv import load_dotenv
 import os
@@ -18,8 +17,59 @@ bot_token = os.getenv("BOT_TOKEN")
 image_url = os.getenv("IMAGE_URL")
 
 flask_app = Flask(__name__)
+@flask_app.route("/ai-image", methods=["GET"])
+def generate_image():
+    try:
+        # Query parameters लेना
+        prompt = request.args.get("prompt", default="A cat with flowers around it.")
+        model = request.args.get("model", default="flux")
+        seed = request.args.get("seed", default="random")
+        height = int(request.args.get("height", default=1024))
+        width = int(request.args.get("width", default=1024))
+        enhance = request.args.get("enhance", default="false").lower() == "true"
 
-@flask_app.route('/aichat/', methods=['GET'])
+        # Pollinations API से इमेज जनरेट करना
+        image_model = pollinations.Image(
+            model=pollinations.Image.flux(),  # सही मॉडल का उपयोग
+            seed=seed,
+            width=width,
+            height=height,
+            enhance=enhance,
+            nologo=True,
+            private=True,
+            safe=False,
+            referrer="pollinations.py"
+        )
+
+        # इमेज को जनरेट करें
+        generated_image = image_model(prompt=prompt)
+
+        # Correct File Path (absolute path for Termux)
+        temp_file = f"generated_image_{prompt.replace(' ', '_')}.png"
+        
+        # Ensure directory exists
+        os.makedirs(os.path.dirname(temp_file), exist_ok=True)
+
+        # इमेज को local file system पर सेव करना (temporary file)
+        generated_image.save(file=temp_file)
+
+        # इमेज को HTTP response के रूप में भेजना
+        response = send_file(
+            temp_file,
+            mimetype='image/png',
+            as_attachment=False,
+            download_name=f"{prompt.replace(' ', '_')}.png"
+        )
+
+        # इमेज को भेजने के बाद उसे delete करना
+        os.remove(temp_file)
+
+        return response
+    
+    except Exception as e:
+        return f"Error: {str(e)}", 500
+"""
+@flask_app.route('/aichat', methods=['GET'])
 def ai_chat():
     model = request.args.get('model', 'gpt-4o-mini')  # Default model
     message = request.args.get('message', '')
@@ -44,6 +94,7 @@ def ai_chat():
         return jsonify({"error": "Failed to generate response", "details": str(e)}), 500
 
     return jsonify({"response": ai_response})
+"""
 """
 @flask_app.route('/aichat/', methods=['GET'])
 def ai_chat():
