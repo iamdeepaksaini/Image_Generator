@@ -10,6 +10,7 @@ import requests
 from PIL import Image, ImageDraw
 from flask import Flask, request, jsonify
 from g4f.client import Client
+import pollinations
 # Telegram API credentials
 api_id = int(os.getenv("API_ID"))
 api_hash = os.getenv("API_HASH")
@@ -18,7 +19,7 @@ image_url = os.getenv("IMAGE_URL")
 
 flask_app = Flask(__name__)
 
-@flask_app.route("/ai-image", methods=["GET"])
+@flask_app.route("/ai-image/", methods=["GET"])
 def generate_image():
     try:
         # Query parameters लेना
