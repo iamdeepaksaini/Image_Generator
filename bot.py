@@ -5,7 +5,7 @@ import os
 import threading
 #from flask import Flask
 from flask import Flask, request, send_file
-import segno
+import qrcode
 from PIL import Image
 import io
 import requests
@@ -16,6 +16,7 @@ bot_token = os.getenv("BOT_TOKEN")
 image_url = os.getenv("IMAGE_URL")
 
 flask_app = Flask(__name__)
+"""
 @flask_app.route('/create-qr-code/', methods=['GET'])
 def create_qr_code():
     # Step 1: Get user parameters from GET request
@@ -111,7 +112,7 @@ def create_qr_code():
 
     # Step 7: Return the image as response
     return send_file(img_io, mimetype='image/png')
-"""
+
 """
 @flask_app.route('/create-qr-code/', methods=['GET'])
 def create_qr_code():
