@@ -19,8 +19,32 @@ image_url = os.getenv("IMAGE_URL")
 
 flask_app = Flask(__name__)
 
+@flask_app.route('/aichat/', methods=['GET'])
+def ai_chat():
+    model = request.args.get('model', 'gpt-4o-mini')  # Default model
+    message = request.args.get('message', '')
 
+    if not message:
+        return jsonify({"error": "Message parameter is required."}), 400
 
+    client = Client()
+    
+    try:
+        # Make the API call
+        response = client.chat.completions.create(
+            model=model,
+            messages=[{"role": "user", "content": message}],
+            web_search=False
+        )
+        
+        # Extract the AI response from the structure
+        ai_response = response.choices[0].message.content
+        
+    except Exception as e:
+        return jsonify({"error": "Failed to generate response", "details": str(e)}), 500
+
+    return jsonify({"response": ai_response})
+"""
 @flask_app.route('/aichat/', methods=['GET'])
 def ai_chat():
     # Get model and message from request parameters
@@ -42,7 +66,7 @@ def ai_chat():
     
     # Return AI response in JSON format
     return jsonify({"response": ai_response})
-
+"""
 
 @flask_app.route('/create-qr-code/', methods=['GET'])
 def create_qr_code():
