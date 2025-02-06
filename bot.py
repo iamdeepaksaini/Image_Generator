@@ -25,7 +25,7 @@ import requests
 
 app = Flask(__name__)
 
-@app.route('/create-qr-code/', methods=['GET'])
+@flask_app.route('/create-qr-code/', methods=['GET'])
 def create_qr_code():
     # Step 1: Get user parameters from GET request
     logo_url = request.args.get('logo', '')  # Logo URL
