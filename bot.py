@@ -6,9 +6,11 @@ import threading
 #from flask import Flask
 from flask import Flask, request, send_file
 import qrcode
-from PIL import Image
 import io
 import requests
+from PIL import Image, ImageDraw
+from flask import Flask, request, jsonify
+import g4f
 # Telegram API credentials
 api_id = int(os.getenv("API_ID"))
 api_hash = os.getenv("API_HASH")
@@ -17,13 +19,30 @@ image_url = os.getenv("IMAGE_URL")
 
 flask_app = Flask(__name__)
 
-from flask import Flask, request, send_file
-import qrcode
-from PIL import Image, ImageDraw
-import io
-import requests
 
-app = Flask(__name__)
+
+@flask_app.route('/aichat/', methods=['GET'])
+def ai_chat():
+    # Get model and message from request parameters
+    model = request.args.get('model', 'default')
+    message = request.args.get('message', '')
+    
+    if not message:
+        return jsonify({"error": "Message parameter is required."}), 400
+    
+    # Generate response using g4f
+    try:
+        response = g4f.ChatCompletion.create(
+            model=model,  # Specify the model if needed
+            messages=[{"role": "user", "content": message}]
+        )
+        ai_response = response['choices'][0]['message']['content']
+    except Exception as e:
+        return jsonify({"error": "Failed to generate response", "details": str(e)}), 500
+    
+    # Return AI response in JSON format
+    return jsonify({"response": ai_response})
+
 
 @flask_app.route('/create-qr-code/', methods=['GET'])
 def create_qr_code():
