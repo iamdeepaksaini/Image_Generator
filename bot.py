@@ -12,6 +12,7 @@ from flask import Flask, request, jsonify
 from g4f.client import Client
 import pollinations
 import uuid
+import json
 # Telegram API credentials
 api_id = int(os.getenv("API_ID"))
 api_hash = os.getenv("API_HASH")
