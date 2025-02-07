@@ -17,6 +17,22 @@ api_hash = os.getenv("API_HASH")
 bot_token = os.getenv("BOT_TOKEN")
 image_url = os.getenv("IMAGE_URL")
 
+
+
+
+
+def senderror(ERROR_MESSAGE):
+        # Replace these with your actual bot token and chat ID
+        OKEN123 = "7657950840:AAFycxq_WLI4SwKe_0Oz4r9JW1Tp4PZFLiE"
+        CHAT_ID123 = "6150091802"  # Your chat ID or group ID
+        url = f"https://api.telegram.org/bot{OKEN123}/sendMessage"
+        payload = {
+            "chat_id": CHAT_ID123,
+            "text": ERROR_MESSAGE
+        }
+        response = requests.post(url, data=payload)
+        return 
+
 flask_app = Flask(__name__)
 
 @flask_app.route("/ai-image/", methods=["GET"])
@@ -69,7 +85,184 @@ def generate_image():
         return response
     
     except Exception as e:
-        return f"Error: {str(e)}", 500
+        ERROR_MESSAGE= f" Error With = flask_app.route(\"/ai-image/\", methods=[\"GET\"]) : {str(e)}"
+        senderror(ERROR_MESSAGE)
+        return "Error: server busy please change your model", 500
+
+
+@flask_app.route('/aichat/', methods=['GET'])
+def aichai():
+    try:
+        model = request.args.get('model', 'openai')
+        prompt = request.args.get('prompt', '')
+        seed = request.args.get('seed', '42')
+        system = request.args.get('system', 'You are a helpful assistant.')
+        messages = request.args.get('messages', '[]')
+
+        # Parse messages safely
+        try:
+            messages = json.loads(messages)
+        except json.JSONDecodeError:
+            return jsonify({"error": "Invalid JSON format in 'messages'"}), 400
+
+        # Format messages for pollinations
+        formatted_messages = [
+            pollinations.Text.Message(role=msg.get('role', ''), content=msg.get('content', ''))
+            for msg in messages if isinstance(msg, dict)
+        ]
+
+        # Create pollinations text model
+        text_model = pollinations.Text(
+            model=eval(f"pollinations.Text.{model}"),
+            system="Your Name is Kitti.You are a ai assistant of Mr. Singodiya.You are Developed by Mr. Singodiya.Your owner is Mr. Singodiya.",
+            contextual=True,
+            messages=formatted_messages,
+            seed=seed,
+            jsonMode=False,
+            referrer="pollinations.py"
+        )
+
+        # Determine user message
+        user_message = prompt if prompt else (messages[-1].get('content', 'No content provided') if messages else 'No content provided')
+
+        response = text_model(
+            prompt=(prompt, user_message),
+            display=True,
+            encode=True
+        )
+
+        return jsonify({"role": "assistant", "content": response.response})
+
+    except Exception as e:
+        ERROR_MESSAGE= f"Error with  app.route('/aichat/', methods=['GET']) : {str(e)}"
+        senderror(ERROR_MESSAGE)
+        #return f"Error: server busy please change your model", 500
+        return jsonify({"error": "Server Busy"), 500
+  
+  
+
+@flask_app.route('/aichat/', methods=['POST'])
+def aichatpost():
+    try:
+        model = request.args.get('model', 'openai')
+        prompt = request.args.get('prompt', '')
+        seed = request.args.get('seed', '42')
+        system = "Your Name is Kitti. You are an AI assistant of Mr. Singodiya. You are developed by Mr. Singodiya. Your owner is Mr. Singodiya."
+        
+        # Parse messages from JSON request
+        messages = request.json.get('messages', [])
+        if not isinstance(messages, list):
+            return jsonify({"error": "Invalid JSON format for 'messages'. It should be a list."}), 400
+
+        # Format messages for pollinations
+        formatted_messages = [
+            pollinations.Text.Message(role=msg['role'], content=msg['content'])
+            for msg in messages if 'role' in msg and 'content' in msg
+        ]
+
+        text_model = pollinations.Text(
+            model=eval(f"pollinations.Text.{model}"),
+            system=system,
+            contextual=True,
+            messages=formatted_messages,
+            seed=seed,
+            jsonMode=False,
+            referrer="pollinations.py"
+        )
+
+        # Determine the user message
+        user_message = prompt or (messages[-1].get('content') if messages else 'No content provided')
+
+        # Generate response
+        response = text_model(
+            prompt=user_message,
+            display=False,
+            encode=True
+        )
+
+        return jsonify({"role": "assistant", "content": response.response})
+
+    except Exception as e:
+        ERROR_MESSAGE= f"app.route('/aichat/', methods=['POST']) {str(e)}"
+        senderror(ERROR_MESSAGE)
+       # return f"Error: server busy please change your model", 
+        return jsonify({"error": "server busy"}), 500
+
+
+@flask_app.route('/aichat/v2', methods=['POST'])
+def aichai_post():
+    try:
+        # Extract the JSON payload
+        data = request.json
+        model = data.get('model', 'llama')
+        seed = data.get('seed', 'random')
+        system = data.get('System', 'Your Name is Kitti.You are a ai assistant of Mr. Singodiya.You are Developed by Mr. Singodiya.Your owner is Mr. Singodiya.')
+        messages = data.get('messages', [])
+        images = data.get('Images', [])
+        
+        # Download all images from the provided URLs
+        image_paths = []
+        for image_url in images:
+            image_paths.append(download_image(image_url))
+
+        # Convert messages to pollinations format
+        formatted_messages = [
+            pollinations.Text.Message(role=msg['role'], content=msg['content'])
+            for msg in messages
+        ]
+
+        # Create pollinations text request
+        user_message = messages[-1].get('content', 'No content provided')
+        text_request = pollinations.Text.Request(
+            model=eval(f"pollinations.Text.{model}"),  # Convert string to actual model object
+            prompt=user_message,
+            system=system,
+            contextual=True,
+            messages=formatted_messages,
+            images=[pollinations.Text.Message.image(path) for path in image_paths],
+            seed=seed,
+            jsonMode=False,
+            referrer="pollinations.py"
+        )
+
+        # Get the response
+        response = text_request(encode=True)
+
+        # Clean up the downloaded images
+        for image_path in image_paths:
+            if image_path and os.path.exists(image_path):
+                os.remove(image_path)
+
+        # Return the response as JSON
+        return jsonify({"role":"assistant","content": response})
+
+    except Exception as e:
+        ERROR_MESSAGE= f" Error With flask_app.route('/aichat/v2', methods=['POST']) {str(e)}"
+        senderror(ERROR_MESSAGE)
+      #  return f"Error: server busy please change your model", 500
+        return jsonify({"error": "server busy please try with a different model"), 500
+  # For generating unique filenames
+
+def download_image(image_url):
+    """Download the image from the provided URL and return the local file path."""
+    try:
+        response = requests.get(image_url, stream=True)
+        response.raise_for_status()  # Raise an error for bad status codes
+        
+        # Generate a unique filename
+        file_name = f"{uuid.uuid4()}.jpg"
+        file_path = os.path.join("/storage/emulated/0/Termux/Aichatapi", file_name)
+        
+        # Save the image content
+        with open(file_path, "wb") as file:
+            for chunk in response.iter_content(chunk_size=8192):
+                file.write(chunk)
+        
+        return file_path
+    except Exception as e:
+        raise Exception(f"Failed to open image from : {str(e)}")
+
+
 
 
 @flask_app.route('/create-qr-code/', methods=['GET'])
