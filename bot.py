@@ -252,7 +252,7 @@ def download_image(image_url):
         
         # Generate a unique filename
         file_name = f"{uuid.uuid4()}.jpg"
-        file_path = os.path.join("/storage/emulated/0/Termux/Aichatapi", file_name)
+        file_path = os.path.join("/tmp/", file_name)
         
         # Save the image content
         with open(file_path, "wb") as file:
