@@ -41,12 +41,13 @@ flask_app = Flask(__name__)
 def generate_image():
     try:
         # Query parameters लेना
-        prompt = request.args.get("prompt", default="A cat with flowers around it.")
+        prompt = request.args.get("prompt", default="Mr. Singodiya name Logo.")
         model = request.args.get("model", default="flux")
-        seed = request.args.get("seed", default="random")
+        seed = request.args.get("seed", default="1245")
         height = int(request.args.get("height", default=1024))
         width = int(request.args.get("width", default=1024))
         enhance = request.args.get("enhance", default="false").lower() == "true"
+        safe = request.args.get("safe", default="true")
 
         # Pollinations API से इमेज जनरेट करना
         image_model = pollinations.Image(
@@ -57,7 +58,7 @@ def generate_image():
             enhance=enhance,
             nologo=True,
             private=True,
-            safe=False,
+            safe=safe,
             referrer="pollinations.py"
         )
 
@@ -133,7 +134,7 @@ def aichai():
             encode=True
         )
 
-        return jsonify({"role": "assistant", "content": response.response})
+        return response.response , 200
 
     except Exception as e:
         ERROR_MESSAGE= f"Error with  app.route('/aichat/', methods=['GET']) : {str(e)}"
@@ -182,7 +183,7 @@ def aichatpost():
             encode=True
         )
 
-        return jsonify({"role": "assistant", "content": response.response})
+        return response.response, 200
 
     except Exception as e:
         ERROR_MESSAGE= f"app.route('/aichat/', methods=['POST']) {str(e)}"
@@ -236,7 +237,7 @@ def aichai_post():
                 os.remove(image_path)
 
         # Return the response as JSON
-        return jsonify({"role":"assistant","content": response})
+        return response, 200
 
     except Exception as e:
         ERROR_MESSAGE= f" Error With flask_app.route('/aichat/v2', methods=['POST']) {str(e)}"
