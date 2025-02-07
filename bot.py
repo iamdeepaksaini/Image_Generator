@@ -32,7 +32,7 @@ pipe = StableDiffusionPipeline.from_pretrained("runwayml/stable-diffusion-v1-5")
 pipe = pipe.to("cuda" if torch.cuda.is_available() else "cpu")
 
 # Helper function to download image from URL
-def download_image(image_url):
+def download_image1(image_url):
     response = requests.get(image_url)
     if response.status_code == 200:
         return Image.open(BytesIO(response.content))
@@ -47,7 +47,7 @@ def ai_image_editor():
     if not image_url:
         return {"error": "Image URL is required"}, 400
 
-    image = download_image(image_url)
+    image = download_image1(image_url)
     if image is None:
         return {"error": "Failed to download image"}, 400
 
