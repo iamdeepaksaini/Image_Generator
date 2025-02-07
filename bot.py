@@ -18,7 +18,7 @@ api_id = int(os.getenv("API_ID"))
 api_hash = os.getenv("API_HASH")
 bot_token = os.getenv("BOT_TOKEN")
 image_url = os.getenv("IMAGE_URL")
-
+"""
 ###########№#№#######################№########₹@÷№
 # Load Stable Diffusion model
 from flask import Flask, request, send_file
@@ -62,7 +62,7 @@ def ai_image_editor():
     return send_file(img_io, mimetype='image/png')
 
 #########################
-
+"""
 def senderror(ERROR_MESSAGE):
         # Replace these with your actual bot token and chat ID
         OKEN123 = "7657950840:AAFycxq_WLI4SwKe_0Oz4r9JW1Tp4PZFLiE"
