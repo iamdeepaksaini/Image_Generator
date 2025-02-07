@@ -11,6 +11,7 @@ from PIL import Image, ImageDraw
 from flask import Flask, request, jsonify
 from g4f.client import Client
 import pollinations
+import uuid
 # Telegram API credentials
 api_id = int(os.getenv("API_ID"))
 api_hash = os.getenv("API_HASH")
@@ -85,7 +86,7 @@ def generate_image():
         return response
     
     except Exception as e:
-        ERROR_MESSAGE= f" Error With = flask_app.route(\"/ai-image/\", methods=[\"GET\"]) : {str(e)}"
+        ERROR_MESSAGE= f"Error With = flask_app.route(\"/ai-image/\", methods=[\"GET\"]) : {str(e)}"
         senderror(ERROR_MESSAGE)
         return "Error: server busy please change your model", 500
 
@@ -96,7 +97,7 @@ def aichai():
         model = request.args.get('model', 'openai')
         prompt = request.args.get('prompt', '')
         seed = request.args.get('seed', '42')
-        system = request.args.get('system', 'You are a helpful assistant.')
+        system = request.args.get('system', 'Your Name is Kitti. You are an AI assistant of Mr. Singodiya. You are developed by Mr. Singodiya. Your owner is Mr. Singodiya.')
         messages = request.args.get('messages', '[]')
 
         # Parse messages safely
@@ -114,7 +115,7 @@ def aichai():
         # Create pollinations text model
         text_model = pollinations.Text(
             model=eval(f"pollinations.Text.{model}"),
-            system="Your Name is Kitti.You are a ai assistant of Mr. Singodiya.You are Developed by Mr. Singodiya.Your owner is Mr. Singodiya.",
+            system=system,
             contextual=True,
             messages=formatted_messages,
             seed=seed,
@@ -137,7 +138,7 @@ def aichai():
         ERROR_MESSAGE= f"Error with  app.route('/aichat/', methods=['GET']) : {str(e)}"
         senderror(ERROR_MESSAGE)
         #return f"Error: server busy please change your model", 500
-        return jsonify({"error": "Server Busy"), 500
+        return jsonify({"error": "Server Busy"}), 500
   
   
 
@@ -147,7 +148,7 @@ def aichatpost():
         model = request.args.get('model', 'openai')
         prompt = request.args.get('prompt', '')
         seed = request.args.get('seed', '42')
-        system = "Your Name is Kitti. You are an AI assistant of Mr. Singodiya. You are developed by Mr. Singodiya. Your owner is Mr. Singodiya."
+        system = request.args.get('system','Your Name is Kitti. You are an AI assistant of Mr. Singodiya. You are developed by Mr. Singodiya. Your owner is Mr. Singodiya.')
         
         # Parse messages from JSON request
         messages = request.json.get('messages', [])
@@ -240,7 +241,7 @@ def aichai_post():
         ERROR_MESSAGE= f" Error With flask_app.route('/aichat/v2', methods=['POST']) {str(e)}"
         senderror(ERROR_MESSAGE)
       #  return f"Error: server busy please change your model", 500
-        return jsonify({"error": "server busy please try with a different model"), 500
+        return jsonify({"error": "server busy please try with a different model"}), 500
   # For generating unique filenames
 
 def download_image(image_url):
