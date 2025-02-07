@@ -19,9 +19,49 @@ api_hash = os.getenv("API_HASH")
 bot_token = os.getenv("BOT_TOKEN")
 image_url = os.getenv("IMAGE_URL")
 
+###########№#№#######################№########₹@÷№
+# Load Stable Diffusion model
+from flask import Flask, request, send_file
+import torch
+from diffusers import StableDiffusionPipeline
+import requests
+from PIL import Image
+from io import BytesIO
 
+pipe = StableDiffusionPipeline.from_pretrained("runwayml/stable-diffusion-v1-5")
+pipe = pipe.to("cuda" if torch.cuda.is_available() else "cpu")
 
+# Helper function to download image from URL
+def download_image(image_url):
+    response = requests.get(image_url)
+    if response.status_code == 200:
+        return Image.open(BytesIO(response.content))
+    else:
+        return None
 
+@app.route('/ai-image-editor', methods=['GET'])
+def ai_image_editor():
+    image_url = request.args.get('image_url')
+    prompt = request.args.get('prompt', "enhance background and add more pixels")
+
+    if not image_url:
+        return {"error": "Image URL is required"}, 400
+
+    image = download_image(image_url)
+    if image is None:
+        return {"error": "Failed to download image"}, 400
+
+    result = pipe(prompt, image=image).images[0]
+
+    # Save processed image to BytesIO
+    img_io = BytesIO()
+    result.save(img_io, 'PNG')
+    img_io.seek(0)
+
+    # Return image as response
+    return send_file(img_io, mimetype='image/png')
+
+#########################
 
 def senderror(ERROR_MESSAGE):
         # Replace these with your actual bot token and chat ID
