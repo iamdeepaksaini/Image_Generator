@@ -386,7 +386,7 @@ app = Client("my_bot", api_id=api_id, api_hash=api_hash, bot_token=bot_token)
 usertime = {}
 # जब भी कोई मैसेज प्राप्त हो
 # Start Command
-@app.on_message(filters.command("start"))
+@app.on_message(filters.command("start") & ~filters.me)
 async def start(client, message):
     first_name = message.from_user.first_name
     await message.reply_text(
@@ -397,7 +397,7 @@ async def start(client, message):
         "ʟᴇᴛ's ᴄʀᴇᴀᴛᴇ sᴏᴍᴇᴛʜɪɴɢ ᴇxᴛʀᴀᴏʀᴅɪɴᴀʀʏ ᴛᴏɢᴇᴛʜᴇʀ!"
     )
     
-@app.on_message(filters.text)
+@app.on_message(filters.text & ~filters.me)
 def reply(client, message):
     user_id = message.from_user.id
     if user_id in usertime:
