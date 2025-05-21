@@ -80,7 +80,7 @@ flask_app = Flask(__name__)
 @flask_app.route('/result')
 def get_result():
     roll_no = request.args.get('roll_no')
-    url = request.args.get('roll_no')
+    url = request.args.get('url')
     if not roll_no:
         return "Error: roll_no parameter missing.", 400
 
