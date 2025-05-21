@@ -8,3 +8,4 @@ Pillow==9.3.0
 qrcode==7.4.2
 g4f[all]
 pollinations
+packaging
