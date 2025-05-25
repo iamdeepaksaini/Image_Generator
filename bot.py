@@ -1,6 +1,7 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, make_response
 from flask_cors import CORS
 import requests
+from bs4 import BeautifulSoup
 
 app = Flask(__name__)
 CORS(app)  # Enables CORS for all routes
@@ -8,6 +9,7 @@ CORS(app)  # Enables CORS for all routes
 @app.route('/')
 def home():
     return "Board Results APIs are working well."
+
 
 @app.route('/result')
 def get_result():
@@ -30,18 +32,6 @@ def get_result():
         return jsonify({'error': f'Request failed: {str(e)}'}), 500
 
 
-
-
-
-
-from flask import Flask, request, make_response
-from flask_cors import CORS
-import requests
-from bs4 import BeautifulSoup
-
-app = Flask(__name__)
-CORS(app)
-
 @app.route('/result-1')
 def result_page():
     name = request.args.get('name')
@@ -52,7 +42,6 @@ def result_page():
     if not name or not url:
         return "Missing 'name' or 'url' parameter", 400
 
-    # Step 1: Initial POST to get __VIEWSTATE
     session = requests.Session()
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
     try:
@@ -63,7 +52,6 @@ def result_page():
     except Exception as e:
         return f"Failed to fetch initial page: {str(e)}", 500
 
-    # Step 2: POST to navigate to the requested page
     post_data = {
         '__VIEWSTATE': viewstate,
         '__VIEWSTATEGENERATOR': viewstategen,
@@ -85,7 +73,6 @@ def result_page():
         table_html = table_html.replace("__doPostBack", "openlink")
         table_html = table_html.replace("showresult('", "showresult('").replace("')", "', this)")
 
-        # Prepare HTML output
         html = f"""
         <!DOCTYPE html>
         <html>
@@ -108,32 +95,33 @@ def result_page():
                         window.location.href = "/result-1?user_id=" + user_id + "&name=" + name + "&page=" + page + "&url=" + url;
                     }}
                 }}
-                function showresult(roll_no, btn) {
-    const result_link = "{result_link}";
-    const user_id = "{user_id}";
-    if (!user_id) {
-        alert("Telegram user ID not found.");
-        return;
-    }
 
-    btn.disabled = true;
-    btn.value = "Please wait...";
+                function showresult(roll_no, btn) {{
+                    const result_link = "{result_link}";
+                    const user_id = "{user_id}";
+                    if (!user_id) {{
+                        alert("Telegram user ID not found.");
+                        return;
+                    }}
 
-    const fetch_url = "/resultsend?user_id=" + user_id + "&roll_no=" + encodeURIComponent(roll_no) + "&sourceurl=" + encodeURIComponent(result_link);
-    fetch(fetch_url).then(response => {
-        if (response.status === 200) {
-            alert("Sent to Telegram. Please check Telegram.");
-        } else {
-            alert("Failed to send result. Status: " + response.status);
-        }
-    }).catch(error => {
-        console.error("Error:", error);
-        alert("An error occurred while sending the result.");
-    }).finally(() => {
-        btn.disabled = false;
-        btn.value = "Get";
-    });
-}
+                    btn.disabled = true;
+                    btn.value = "Please wait...";
+
+                    const fetch_url = "/resultsend?user_id=" + user_id + "&roll_no=" + encodeURIComponent(roll_no) + "&sourceurl=" + encodeURIComponent(result_link);
+                    fetch(fetch_url).then(response => {{
+                        if (response.status === 200) {{
+                            alert("Sent to Telegram. Please check Telegram.");
+                        }} else {{
+                            alert("Failed to send result. Status: " + response.status);
+                        }}
+                    }}).catch(error => {{
+                        console.error("Error:", error);
+                        alert("An error occurred while sending the result.");
+                    }}).finally(() => {{
+                        btn.disabled = false;
+                        btn.value = "Get";
+                    }});
+                }}
             </script>
         </head>
         <body>
@@ -147,18 +135,14 @@ def result_page():
             </div>
             {table_html}
         </body>
-        </html>"""
+        </html>
+        """
         response = make_response(html)
         response.headers['Content-Type'] = 'text/html'
         return response
 
     except Exception as e:
         return f"Error while processing result table: {str(e)}", 500
-
-
-
-
-
 
 
 if __name__ == "__main__":
