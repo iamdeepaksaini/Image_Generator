@@ -10,19 +10,10 @@ CORS(app)  # Enables CORS for all routes
 def home():
     return "Board Results APIs are working well."
 
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-import requests
-import tempfile
-import os
-
-app = Flask(__name__)
-CORS(app)
-
 BOT_TOKEN = '7831738668:AAH7Qc1zYoNd5DrY85kU4EN4GXY01JF91fk'
 
 @app.route('/resultsend')
-def send_result_pdf():
+def send_result_pdf_direct():
     user_id = request.args.get('user_id')
     roll_no = request.args.get('roll_no')
     full_query = request.query_string.decode('utf-8')
@@ -33,45 +24,26 @@ def send_result_pdf():
     if not user_id or not roll_no or not sourceurl:
         return "Missing parameters", 400
 
-    # Build the final URL
+    # Final PDF URL to be sent directly
     encoded_sourceurl = requests.utils.quote(sourceurl, safe='')
-    target_url = f"https://sainipankaj12.serv00.net/savepdf.php?url=https://sainipankaj12.serv00.net/Result/get.php?roll_no={roll_no}&url={encoded_sourceurl}"
+    pdf_url = f"https://sainipankaj12.serv00.net/savepdf.php?url=https://sainipankaj12.serv00.net/Result/get.php?roll_no={roll_no}&url={encoded_sourceurl}"
+
+    telegram_url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendDocument"
+    payload = {
+        'chat_id': user_id,
+        'document': pdf_url,
+        'caption': f"Your result PDF for Roll No: {roll_no}"
+    }
 
     try:
-        pdf_response = requests.get(target_url)
-        if pdf_response.status_code != 200:
-            return "Failed to generate PDF", 500
-
-        # Save to temporary file
-        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as temp_pdf:
-            temp_pdf.write(pdf_response.content)
-            temp_pdf_path = temp_pdf.name
-
-        # Send the file to Telegram
-        telegram_url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendDocument"
-        with open(temp_pdf_path, 'rb') as pdf_file:
-            files = {
-                'document': (f"Result-{roll_no}.pdf", pdf_file, 'application/pdf')
-            }
-            data = {
-                'chat_id': user_id,
-                'caption': f"Your result PDF for Roll No: {roll_no}"
-            }
-            telegram_response = requests.post(telegram_url, data=data, files=files)
-
-        os.remove(temp_pdf_path)
-
+        telegram_response = requests.post(telegram_url, data=payload)
         if telegram_response.status_code == 200:
             return "Success", 200
         else:
-            return "Failed to send PDF", 500
-
+            return f"Failed to send PDF. Telegram status: {telegram_response.status_code}", 500
     except Exception as e:
         return f"Error: {str(e)}", 500
 
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
 @app.route('/result')
 def get_result():
     roll_no = request.args.get('roll_no')
