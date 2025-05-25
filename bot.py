@@ -83,6 +83,7 @@ def result_page():
 
         table_html = str(table)
         table_html = table_html.replace("__doPostBack", "openlink")
+        table_html = table_html.replace("showresult('", "showresult('").replace("')", "', this)")
 
         # Prepare HTML output
         html = f"""
@@ -107,25 +108,32 @@ def result_page():
                         window.location.href = "/result-1?user_id=" + user_id + "&name=" + name + "&page=" + page + "&url=" + url;
                     }}
                 }}
-                function showresult(roll_no) {{
-                    const result_link = "{result_link}";
-                    const user_id = "{user_id}";
-                    if (!user_id) {{
-                        alert("Telegram user ID not found.");
-                        return;
-                    }}
-                    const fetch_url = "/resultsend?user_id=" + user_id + "&roll_no=" + encodeURIComponent(roll_no) + "&sourceurl=" + encodeURIComponent(result_link);
-                    fetch(fetch_url).then(response => {{
-                        if (response.status === 200) {{
-                            alert("Sent to Telegram. Please check Telegram.");
-                        }} else {{
-                            alert("Failed to send result. Status: " + response.status);
-                        }}
-                    }}).catch(error => {{
-                        console.error("Error:", error);
-                        alert("An error occurred while sending the result.");
-                    }});
-                }}
+                function showresult(roll_no, btn) {
+    const result_link = "{result_link}";
+    const user_id = "{user_id}";
+    if (!user_id) {
+        alert("Telegram user ID not found.");
+        return;
+    }
+
+    btn.disabled = true;
+    btn.value = "Please wait...";
+
+    const fetch_url = "/resultsend?user_id=" + user_id + "&roll_no=" + encodeURIComponent(roll_no) + "&sourceurl=" + encodeURIComponent(result_link);
+    fetch(fetch_url).then(response => {
+        if (response.status === 200) {
+            alert("Sent to Telegram. Please check Telegram.");
+        } else {
+            alert("Failed to send result. Status: " + response.status);
+        }
+    }).catch(error => {
+        console.error("Error:", error);
+        alert("An error occurred while sending the result.");
+    }).finally(() => {
+        btn.disabled = false;
+        btn.value = "Get";
+    });
+}
             </script>
         </head>
         <body>
