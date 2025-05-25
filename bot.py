@@ -85,8 +85,7 @@ def result_page():
         table_html = table_html.replace("__doPostBack", "openlink")
 
         # Prepare HTML output
-        html =
-f"""
+        html = f"""
         <!DOCTYPE html>
         <html>
         <head>
@@ -140,8 +139,7 @@ f"""
             </div>
             {table_html}
         </body>
-        </html>
-"""
+        </html>"""
         response = make_response(html)
         response.headers['Content-Type'] = 'text/html'
         return response
