@@ -144,15 +144,17 @@ def result_page():
                     fetch(fetch_url).then(response => {{
                         if (response.status === 200) {{
                             alert("Sent to Telegram. Please check Telegram.");
+                            btn.value = "Sent";
                         }} else {{
                             alert("Failed to send result. Status: " + response.status);
+                            btn.value = "Faild";
+
                         }}
                     }}).catch(error => {{
                         console.error("Error:", error);
                         alert("An error occurred while sending the result.");
                     }}).finally(() => {{
-                        btn.disabled = false;
-                        btn.value = "Get";
+                        btn.disabled = false;                        
                     }});
                 }}
             </script>
