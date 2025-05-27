@@ -113,6 +113,7 @@ def fetch_result():
 
     except Exception as e:
         return make_response(f"Error occurred: {str(e)}", 500)
+
 @app.route('/result')
 def get_result():
     roll_no = request.args.get('roll_no')
@@ -197,34 +198,11 @@ def result_page():
                     }}
                 }}
 
-                function showresult(roll_no, btn) {{
-                    const result_link = "{result_link}";
-                    const user_id = "{user_id}";
-                    if (!user_id) {{
-                        alert("Telegram user ID not found.");
-                        return;
-                    }}
-
-                    btn.disabled = true;
-                    btn.value = "Please wait...";
-
-                    const fetch_url = "/resultsend?user_id=" + user_id + "&roll_no=" + encodeURIComponent(roll_no) + "&sourceurl=" + encodeURIComponent(result_link);
-                    fetch(fetch_url).then(response => {{
-                        if (response.status === 200) {{
-                            alert("Sent to Telegram. Please check Telegram.");
-                            btn.value = "Sent";
-                        }} else {{
-                            alert("Failed to send result. Status: " + response.status);
-                            btn.value = "Faild";
-
-                        }}
-                    }}).catch(error => {{
-                        console.error("Error:", error);
-                        alert("An error occurred while sending the result.");
-                    }}).finally(() => {{
-                        btn.disabled = false;                        
-                    }});
-                }}
+                function showresult(roll_no, btn) {
+                   const result_link = "{result_link}";
+                   const redirect_url = "/resultget?roll_no=" + encodeURIComponent(roll_no) + "&url=" + encodeURIComponent(result_link);
+                   window.location.href = redirect_url;
+                }
             </script>
         </head>
         <body>
@@ -246,8 +224,8 @@ def result_page():
 
     except Exception as e:
         return f"Error while processing result table: {str(e)}", 500
-"""
-@app.route('/result-1')
+
+@app.route('/result-11')
 def result_page():
     name = request.args.get('name')
     page = request.args.get('page', '1')
@@ -361,6 +339,6 @@ def result_page():
     except Exception as e:
         return f"Error while processing result table: {str(e)}", 500
 
-"""
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
