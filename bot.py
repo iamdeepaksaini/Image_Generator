@@ -198,11 +198,11 @@ def result_page():
                     }}
                 }}
 
-                function showresult(roll_no, btn) {
+                function showresult(roll_no, btn) {{
                    const result_link = "{result_link}";
                    const redirect_url = "/resultget?roll_no=" + encodeURIComponent(roll_no) + "&url=" + encodeURIComponent(result_link);
                    window.location.href = redirect_url;
-                }
+                }}
             </script>
         </head>
         <body>
