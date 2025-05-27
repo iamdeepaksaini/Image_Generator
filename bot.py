@@ -226,7 +226,7 @@ def result_page():
         return f"Error while processing result table: {str(e)}", 500
 
 @app.route('/result-11')
-def result_page():
+def result_page1():
     name = request.args.get('name')
     page = request.args.get('page', '1')
     url = request.args.get('url')
