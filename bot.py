@@ -43,7 +43,76 @@ def send_result_pdf_direct():
             return f"Failed to send PDF. Telegram status: {telegram_response.status_code}", 500
     except Exception as e:
         return f"Error: {str(e)}", 500
+@app.route("/resultget", methods=["GET"])
+def fetch_result():
+    roll_no = request.args.get("roll_no")
+    query_string = request.query_string.decode()
 
+    if "url=" not in query_string:
+        return "Missing url parameter.", 400
+
+    url_pos = query_string.find("url=")
+    raw_url = query_string[url_pos + 4:]
+    url = requests.utils.unquote(raw_url)
+
+    if not roll_no or not url:
+        return "Missing roll_no or url.", 400
+
+    headers = {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Origin': 'https://rj-12-science-result.indiaresults.com',
+        'Referer': 'https://rj-12-science-result.indiaresults.com/rj/bser/class-12-science-result-2022/query.htm',
+        'User-Agent': 'Mozilla/5.0',
+    }
+
+    try:
+        res = requests.post(url, data={"rollno": roll_no}, headers=headers, allow_redirects=True)
+        soup = BeautifulSoup(res.text, 'html.parser')
+
+        table = soup.find("table", string=lambda t: t and "Personal Details" in t and "Final Result" in t)
+        if not table:
+            tables = soup.find_all("table")
+            for t in tables:
+                if "Personal Details" in t.get_text() and "Final Result" in t.get_text():
+                    table = t
+                    break
+
+        if table:
+            html = f"""
+            <html>
+            <head>
+                <style>
+                    .back-button {{
+                        margin-top: 20px;
+                        padding: 10px 20px;
+                        background-color: #28a745;
+                        color: white;
+                        border: none;
+                        border-radius: 5px;
+                        font-size: 16px;
+                        cursor: pointer;
+                    }}
+                    .back-button:hover {{
+                        background-color: #218838;
+                    }}
+                    body {{
+                        font-family: Arial, sans-serif;
+                        text-align: center;
+                    }}
+                </style>
+            </head>
+            <body>
+                {str(table)}
+                <button class="back-button" onclick="history.back()">Back</button>
+            </body>
+            </html>
+            """
+            return make_response(html, 200)
+        else:
+            return make_response("Result Not Declared! Please try again later.", 400)
+
+    except Exception as e:
+        return make_response(f"Error occurred: {str(e)}", 500)
 @app.route('/result')
 def get_result():
     roll_no = request.args.get('roll_no')
@@ -63,7 +132,6 @@ def get_result():
         return response.text, response.status_code
     except requests.exceptions.RequestException as e:
         return jsonify({'error': f'Request failed: {str(e)}'}), 500
-
 
 @app.route('/result-1')
 def result_page():
@@ -178,7 +246,121 @@ def result_page():
 
     except Exception as e:
         return f"Error while processing result table: {str(e)}", 500
+"""
+@app.route('/result-1')
+def result_page():
+    name = request.args.get('name')
+    page = request.args.get('page', '1')
+    url = request.args.get('url')
+    user_id = request.args.get('user_id', '')
 
+    if not name or not url:
+        return "Missing 'name' or 'url' parameter", 400
 
+    session = requests.Session()
+    headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+    try:
+        initial_response = session.post(url, headers=headers, data={'name': name})
+        soup = BeautifulSoup(initial_response.text, 'html.parser')
+        viewstate = soup.find('input', {'name': '__VIEWSTATE'}).get('value', '')
+        viewstategen = soup.find('input', {'name': '__VIEWSTATEGENERATOR'}).get('value', '')
+    except Exception as e:
+        return f"Failed to fetch initial page: {str(e)}", 500
+
+    post_data = {
+        '__VIEWSTATE': viewstate,
+        '__VIEWSTATEGENERATOR': viewstategen,
+        '__EVENTTARGET': 'GridView1',
+        '__EVENTARGUMENT': f'Page${page}',
+        'name': name
+    }
+
+    try:
+        final_response = session.post(url, headers=headers, data=post_data)
+        soup = BeautifulSoup(final_response.text, 'html.parser')
+        table = soup.find('table', {'id': 'GridView1'})
+        if not table:
+            return "No result table found.", 400
+
+        result_link = url.replace("mName-results.aspx", "mrollresult.asp").replace("mname-results.aspx", "mrollresult.asp")
+
+        table_html = str(table)
+        table_html = table_html.replace("__doPostBack", "openlink")
+        table_html = table_html.replace("showresult('", "showresult('").replace("')", "', this)")
+
+        html = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>{name}</title>
+            <style>
+                body {{ zoom: 87%; background-color: #fff; color: #000; margin: 0; padding: 0; }}
+                table {{ border-collapse: collapse; width: 100%; }}
+                th, td {{ padding: 8px; border: 1px solid #ccc; text-align: center; }}
+                th {{ background: #eee; }}
+            </style>
+            <script>
+                function openlink(control, arg) {{
+                    const parts = arg.split('$');
+                    if (parts.length === 2 && parts[0] === 'Page') {{
+                        const page = parts[1];
+                        const name = encodeURIComponent("{name}");
+                        const url = encodeURIComponent("{url}");
+                        const user_id = "{user_id}";
+                        window.location.href = "/result-1?user_id=" + user_id + "&name=" + name + "&page=" + page + "&url=" + url;
+                    }}
+                }}
+
+                function showresult(roll_no, btn) {{
+                    const result_link = "{result_link}";
+                    const user_id = "{user_id}";
+                    if (!user_id) {{
+                        alert("Telegram user ID not found.");
+                        return;
+                    }}
+
+                    btn.disabled = true;
+                    btn.value = "Please wait...";
+
+                    const fetch_url = "/resultsend?user_id=" + user_id + "&roll_no=" + encodeURIComponent(roll_no) + "&sourceurl=" + encodeURIComponent(result_link);
+                    fetch(fetch_url).then(response => {{
+                        if (response.status === 200) {{
+                            alert("Sent to Telegram. Please check Telegram.");
+                            btn.value = "Sent";
+                        }} else {{
+                            alert("Failed to send result. Status: " + response.status);
+                            btn.value = "Faild";
+
+                        }}
+                    }}).catch(error => {{
+                        console.error("Error:", error);
+                        alert("An error occurred while sending the result.");
+                    }}).finally(() => {{
+                        btn.disabled = false;                        
+                    }});
+                }}
+            </script>
+        </head>
+        <body>
+            <div style="display: flex; align-items: center; gap: 10px; padding: 10px;">
+                <button onclick="history.back()" style="background: none; border: none; cursor: pointer;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="#007bff" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M15 8a.5.5 0 0 1-.5.5H2.707l4.147 4.146a.5.5 0 0 1-.708.708l-5-5a.5.5 0 0 1 0-.708l5-5a.5.5 0 1 1 .708.708L2.707 7.5H14.5A.5.5 0 0 1 15 8z"/>
+                    </svg>
+                </button>
+                <h2 style="margin: 0;">{name}</h2>
+            </div>
+            {table_html}
+        </body>
+        </html>
+        """
+        response = make_response(html)
+        response.headers['Content-Type'] = 'text/html'
+        return response
+
+    except Exception as e:
+        return f"Error while processing result table: {str(e)}", 500
+
+"""
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
